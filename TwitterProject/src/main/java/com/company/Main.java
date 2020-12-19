@@ -2,10 +2,13 @@ package com.company;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
+import java.io.*;
+import java.util.*;
+
 
 public class Main {
 
-    public static void main(String[] args) throws TwitterException {
+    public static void main(String[] args) throws TwitterException, IOException {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.setDebugEnabled(true)
                 .setOAuthConsumerKey("JiJsMbG6lSJSbBQHlIIzvA0Yj")
@@ -16,24 +19,18 @@ public class Main {
         TwitterFactory twitterFactory = new TwitterFactory(configurationBuilder.build());
         Twitter twitter = twitterFactory.getInstance();
 
-       /*
-       //get tweets of my account
-       List<Status> status = twitter.getHomeTimeline();
-
-        for (Status s:status)
-        {
-            System.out.println(s.getUser().getName()+ "     "+ s.getText());
-        }
 
         //get tweets of specific user
-        List<Status> statuses = twitter.getUserTimeline("SophiaH_espc");
-
+        List<Status> statuses = twitter.getUserTimeline("HuffPostRelig");
+        String s = "";
         for (Status status : statuses) {
-            String fmt = "@" + status.getUser().getScreenName() + " - " + status.getText();
-            System.out.println(fmt);
+            s = s + status.getText() + "\n";
+            //System.out.println(s);
         }
-
-
+        FileWriter fr = new FileWriter("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv");
+        fr.write(s);
+        fr.close();
+/*
         //get followers of specific user *error, only 20 follower are retrieved*
         PagableResponseList<User> followersList;
 
@@ -65,15 +62,72 @@ public class Main {
             followers.add(twitter.showUser(ids[i]));
             System.out.println("Follower " + i + ": " + followers.get(i));
         }
-        */
+
 
         // The factory instance is re-useable and thread safe.
-
 
         Query query = new Query("Ahmed___Gamal__ in");
         QueryResult result = twitter.search(query);
         for (Status status : result.getTweets()) {
             System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+        }
+*/
+
+        try{
+            int count=0;
+            String tweet;
+
+            ArrayList<String> stopwords= new ArrayList<String>();
+            BufferedReader stop = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\stopwords.txt"));
+            String line = "";
+            while ((line = stop.readLine()) != null)
+            {
+                stopwords.add(line);
+            }
+
+            Map<String, String> map = new HashMap<String, String>();
+            BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\AFINN"));
+
+            line="";
+            while ((line = in.readLine()) != null) {
+                String parts[] = line.split("\t");
+                map.put(parts[0], parts[1]);
+                count++;
+            }
+            in.close();
+            System.out.println(map.toString());
+
+            Scanner inputStream= new Scanner(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv"));
+            while(inputStream.hasNextLine())
+            {
+                float tweetscore=0;
+                tweet= inputStream.nextLine();
+                String[] word=tweet.split(" ");
+
+                for(int i=0; i<word.length;i++)
+                {
+                    if(stopwords.contains(word[i].toLowerCase()))
+                    {
+
+                    }
+                    else{
+                        if(map.get(word[i])!=null)
+                        {
+                            String wordscore= map.get(word[i].toLowerCase());
+                            tweetscore=(float) tweetscore + Integer.parseInt(wordscore);
+                        }
+                    }
+                }
+                Map<String, Float> sentiment= new HashMap<String, Float>();
+                sentiment.put(tweet, tweetscore);
+                System.out.println(sentiment.toString());
+            }
+
+        }
+        catch(FileNotFoundException e)
+        {
+           e.printStackTrace();
+
         }
     }
 

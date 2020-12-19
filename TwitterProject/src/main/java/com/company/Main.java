@@ -88,14 +88,19 @@ public class Main {
             Map<String, String> map = new HashMap<String, String>();
             BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\AFINN"));
 
+            int totalScore = 0;
             line="";
             while ((line = in.readLine()) != null) {
                 String parts[] = line.split("\t");
-                map.put(parts[0], parts[1]);
+
+                map.put("\n" + parts[0], parts[1]);
+                totalScore += Integer.parseInt(parts[1]);
+
                 count++;
             }
             in.close();
             System.out.println(map.toString());
+            System.out.println("\n" + "Total Score = " + totalScore + "\n");
 
             Scanner inputStream= new Scanner(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv"));
             while(inputStream.hasNextLine())
@@ -115,14 +120,14 @@ public class Main {
                         {
                             String wordscore= map.get(word[i].toLowerCase());
                             tweetscore=(float) tweetscore + Integer.parseInt(wordscore);
+
                         }
                     }
                 }
                 Map<String, Float> sentiment= new HashMap<String, Float>();
                 sentiment.put(tweet, tweetscore);
-                System.out.println(sentiment.toString());
+                System.out.println( sentiment.toString());
             }
-
         }
         catch(FileNotFoundException e)
         {

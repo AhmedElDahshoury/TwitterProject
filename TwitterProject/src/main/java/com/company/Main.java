@@ -2,6 +2,7 @@ package com.company;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
+import javax.sound.sampled.Line;
 import java.io.*;
 import java.util.*;
 
@@ -16,65 +17,45 @@ public class Main {
                 .setOAuthAccessToken("1106547266456879104-TL9trHC8Ap7ZbJAv9ygEwexcoDHyZR")
                 .setOAuthAccessTokenSecret("fLs7MFpGB2fUPlLROo1TyC5whJNNiTrKJ3VDxnPs1pMLD");
 
-        TwitterFactory twitterFactory = new TwitterFactory(configurationBuilder.build());
-        Twitter twitter = twitterFactory.getInstance();
-
-
-        //get tweets of specific user
-        List<Status> statuses = twitter.getUserTimeline("HuffPostRelig");
+        Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
+/*
+        Paging pg = new Paging();
         String s = "";
-        for (Status status : statuses) {
-            s = s + status.getText() + "\n";
-            //System.out.println(s);
-        }
         FileWriter fr = new FileWriter("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv");
+
+        int lks = 0, rtws = 0;
+
+        String userName = "HuffPostRelig";
+        int numberOfTweets = 1000;
+        long lastID = Long.MAX_VALUE;
+        ArrayList<Status> tweets = new ArrayList<Status>();
+        int count = 0;
+        while (tweets.size () < numberOfTweets) {
+            try {
+                tweets.addAll(twitter.getUserTimeline(userName,pg));
+                for (Status t: tweets) {
+                    s = s + t.getText() + "\n";
+                    rtws += t.getRetweetCount();
+                    lks += t.getFavoriteCount();
+
+                    if (t.getId() < lastID) lastID = t.getId();
+                    count++;
+                }
+            }
+        catch (TwitterException te) {
+                System.out.println("Couldn't connect: " + te);
+            };
+            pg.setMaxId(lastID-1);
+        }
+
         fr.write(s);
         fr.close();
-/*
-        //get followers of specific user *error, only 20 follower are retrieved*
-        PagableResponseList<User> followersList;
 
-        ArrayList<String> list = new ArrayList<String>();
-
-            List<User> friendList = null;
-            try   {
-                followersList = twitter.getFollowersList("SophiaH_espc", -1);
-
-                for (int i = 0; i < followersList.size(); i++)
-                {
-                    User user = followersList.get(i);
-                    String name = user.getName();
-                    list.add(name);
-                    System.out.println("Name" + i + ":" + name);
-                }
-
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-
-            }
- */
-        /*
-        IDs followersIds = twitter.getFollowersIDs("ReviewReligions",-1);
-        long [] ids = followersIds.getIDs();
-
-        List<User> followers = new ArrayList<User>();
-        for(int i = 0; i < 500; i++) {
-            followers.add(twitter.showUser(ids[i]));
-            System.out.println("Follower " + i + ": " + followers.get(i));
-        }
-
-
-        // The factory instance is re-useable and thread safe.
-
-        Query query = new Query("Ahmed___Gamal__ in");
-        QueryResult result = twitter.search(query);
-        for (Status status : result.getTweets()) {
-            System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
-        }
+        System.out.println("Total retweets: " + rtws);
+        System.out.println("Total Likes: " + lks);
+        //System.out.println(s);
 */
-
         try{
-            int count=0;
             String tweet;
 
             ArrayList<String> stopwords= new ArrayList<String>();
@@ -86,22 +67,22 @@ public class Main {
             }
 
             Map<String, String> map = new HashMap<String, String>();
-            BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\AFINN"));
+            BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\Weights"));
 
             int totalScore = 0;
+            int k = 0;
             line="";
             while ((line = in.readLine()) != null) {
                 String parts[] = line.split("\t");
 
-                map.put("\n" + parts[0], parts[1]);
-                totalScore += Integer.parseInt(parts[1]);
-
-                count++;
+                    map.put(parts[0], parts[1] );
+                    totalScore += Integer.parseInt(parts[1]);
+                    k++;
+                    System.out.println( k + " : " +totalScore);
             }
             in.close();
-            System.out.println(map.toString());
-            System.out.println("\n" + "Total Score = " + totalScore + "\n");
-
+            //System.out.println("\nMap: " + map.toString());
+            //System.out.println("\n" + "Total wights score: " + totalScore);
             Scanner inputStream= new Scanner(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv"));
             while(inputStream.hasNextLine())
             {
@@ -124,15 +105,16 @@ public class Main {
                         }
                     }
                 }
+                //System.out.println("\n" + "Total Score = " + tweetscore + "\n");
+
                 Map<String, Float> sentiment= new HashMap<String, Float>();
                 sentiment.put(tweet, tweetscore);
-                System.out.println( sentiment.toString());
+                //System.out.println( sentiment.toString());
             }
         }
         catch(FileNotFoundException e)
         {
            e.printStackTrace();
-
         }
     }
 

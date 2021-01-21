@@ -12,10 +12,10 @@ public class Main {
     public static void main(String[] args) throws TwitterException, IOException {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.setDebugEnabled(true)
-                .setOAuthConsumerKey("JiJsMbG6lSJSbBQHlIIzvA0Yj")
-                .setOAuthConsumerSecret("aLFHDzhhEJdKP8oKSqOpDJlaVku3fRRJqhVp0GCfWnMss3aYSE")
-                .setOAuthAccessToken("1106547266456879104-TL9trHC8Ap7ZbJAv9ygEwexcoDHyZR")
-                .setOAuthAccessTokenSecret("fLs7MFpGB2fUPlLROo1TyC5whJNNiTrKJ3VDxnPs1pMLD");
+                .setOAuthConsumerKey("**********")
+                .setOAuthConsumerSecret("**********")
+                .setOAuthAccessToken("**********")
+                .setOAuthAccessTokenSecret("**********");
 
         Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
 ///*
@@ -155,6 +155,5 @@ public class Main {
 //*/
 
     }
-
 }
 

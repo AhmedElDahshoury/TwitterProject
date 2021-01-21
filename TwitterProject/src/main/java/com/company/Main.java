@@ -18,12 +18,51 @@ public class Main {
                 .setOAuthAccessTokenSecret("fLs7MFpGB2fUPlLROo1TyC5whJNNiTrKJ3VDxnPs1pMLD");
 
         Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
-/*
+///*
+        String tweet;
+
+        ArrayList<String> stopwords= new ArrayList<String>();
+        BufferedReader stop = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\stopwords.txt"));
+        String line = "";
+        while ((line = stop.readLine()) != null)
+        {
+            stopwords.add(line);
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\Weights"));
+
+        int totalScore = 0;
+        int k = 0;
+        line="";
+        while ((line = in.readLine()) != null) {
+            String parts[] = line.split("\t");
+
+            map.put(parts[0], parts[1] );
+            totalScore += Integer.parseInt(parts[1]);
+            k++;
+            //System.out.println( k + " : " +totalScore);
+        }
+        in.close();
+        //System.out.println("\nMap: " + map.toString());
+        //System.out.println("\n" + "Total wights score: " + totalScore);
+        Scanner inputStream= new Scanner(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv"));
+
         Paging pg = new Paging();
         String s = "";
         FileWriter fr = new FileWriter("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv");
 
         int lks = 0, rtws = 0;
+        int positiveTweetsCount = 0;
+        int negativeTweetsCount = 0;
+        int neutralTweetsCount =0;
+        int positiveRetweetsCount = 0;
+        int positiveLikesCount = 0;
+        int negativeRetweetsCount = 0;
+        int negativeLikesCount = 0;
+        int neutralLikesCount = 0;
+        int neutralRetweetsCount = 0;
+        int tweetsWithKeyWords = 0;
 
         String userName = "HuffPostRelig";
         int numberOfTweets = 1000;
@@ -34,9 +73,55 @@ public class Main {
             try {
                 tweets.addAll(twitter.getUserTimeline(userName,pg));
                 for (Status t: tweets) {
+                    count++;
                     s = s + t.getText() + "\n";
                     rtws += t.getRetweetCount();
                     lks += t.getFavoriteCount();
+
+                    String[] word=t.getText().split(" ");
+                    int tweetWeight = 0;
+                    boolean flag = false;
+                    //check each word
+                    for(int i=0; i<word.length;i++) {
+                        int wordWeight = 0;
+                        if (stopwords.contains(word[i].toLowerCase())) {
+                            //Ignore words in tweets if these words exist in the stopWords file
+                        }
+                        else {
+                            //if a match is found between keywords and tweets
+                            if (map.get(word[i]) != null) {
+
+                                String s1 = map.get(word[i].toLowerCase());
+                                tweetWeight = (int) wordWeight + Integer.parseInt(s1);
+
+                                //tweet with keyword found
+                                flag = true;
+                            }
+                        }
+                    }
+
+                    if (flag == true){
+                        tweetsWithKeyWords++;
+
+                        if (tweetWeight > 0){
+                            positiveTweetsCount ++;
+
+                            positiveRetweetsCount += t.getRetweetCount();
+                            positiveLikesCount += t.getFavoriteCount();
+                        }
+                        else if (tweetWeight < 0){
+                            negativeTweetsCount++;
+
+                            negativeRetweetsCount += t.getRetweetCount();
+                            negativeLikesCount += t.getFavoriteCount();
+                        }
+                        else {
+                            neutralTweetsCount++;
+
+                            neutralRetweetsCount += t.getRetweetCount();
+                            neutralLikesCount += t.getRetweetCount();
+                        }
+                    }
 
                     if (t.getId() < lastID) lastID = t.getId();
                     count++;
@@ -51,71 +136,24 @@ public class Main {
         fr.write(s);
         fr.close();
 
+        ///*
         System.out.println("Total retweets: " + rtws);
         System.out.println("Total Likes: " + lks);
-        //System.out.println(s);
-*/
-        try{
-            String tweet;
 
-            ArrayList<String> stopwords= new ArrayList<String>();
-            BufferedReader stop = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\stopwords.txt"));
-            String line = "";
-            while ((line = stop.readLine()) != null)
-            {
-                stopwords.add(line);
-            }
+        System.out.println("Tweets with keywords: " + tweetsWithKeyWords);
+        System.out.println("positive Tweets Count: " + positiveTweetsCount);
+        System.out.println("negative Tweets Count: " + negativeTweetsCount);
+        System.out.println("neutral Tweets Count: " + neutralTweetsCount);
+        System.out.println("positive retweets Count: " + positiveRetweetsCount);
+        System.out.println("positive likes Count: " + positiveLikesCount);
+        System.out.println("negative retweets Count: " + negativeRetweetsCount);
+        System.out.println("negative likes Count: " + negativeLikesCount);
+        System.out.println("neutral Tweets Count: " + neutralTweetsCount);
+        System.out.println("neutral Retweets Count: " + neutralRetweetsCount);
+        System.out.println("neutral likes Count: " + neutralLikesCount);
+        System.out.println("Total number of tweets: " + count);
+//*/
 
-            Map<String, String> map = new HashMap<String, String>();
-            BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\Weights"));
-
-            int totalScore = 0;
-            int k = 0;
-            line="";
-            while ((line = in.readLine()) != null) {
-                String parts[] = line.split("\t");
-
-                    map.put(parts[0], parts[1] );
-                    totalScore += Integer.parseInt(parts[1]);
-                    k++;
-                    System.out.println( k + " : " +totalScore);
-            }
-            in.close();
-            //System.out.println("\nMap: " + map.toString());
-            //System.out.println("\n" + "Total wights score: " + totalScore);
-            Scanner inputStream= new Scanner(new FileReader("C:\\Users\\agama\\source\\repos\\TwitterProject\\TwitterProject\\Data\\TestTweets.csv"));
-            while(inputStream.hasNextLine())
-            {
-                float tweetscore=0;
-                tweet= inputStream.nextLine();
-                String[] word=tweet.split(" ");
-
-                for(int i=0; i<word.length;i++)
-                {
-                    if(stopwords.contains(word[i].toLowerCase()))
-                    {
-
-                    }
-                    else{
-                        if(map.get(word[i])!=null)
-                        {
-                            String wordscore= map.get(word[i].toLowerCase());
-                            tweetscore=(float) tweetscore + Integer.parseInt(wordscore);
-
-                        }
-                    }
-                }
-                //System.out.println("\n" + "Total Score = " + tweetscore + "\n");
-
-                Map<String, Float> sentiment= new HashMap<String, Float>();
-                sentiment.put(tweet, tweetscore);
-                //System.out.println( sentiment.toString());
-            }
-        }
-        catch(FileNotFoundException e)
-        {
-           e.printStackTrace();
-        }
     }
 
 }
